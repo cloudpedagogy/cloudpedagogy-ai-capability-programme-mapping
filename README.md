@@ -159,3 +159,26 @@ From the project root:
 ```bash
 npm install
 npm run dev
+```
+
+## Licensing
+
+This repository is licensed under the **Creative Commons Attribution–NonCommercial–ShareAlike 4.0 International (CC BY-NC-SA 4.0)** licence.
+
+This means you may:
+
+- use, share, and adapt the tool for **educational, research, and public-interest purposes**
+- do so **with appropriate attribution**
+- share adaptations **under the same licence**
+
+Commercial use, resale, or incorporation into paid products or services is **not permitted without explicit permission**.
+
+This licensing approach supports open educational reuse while protecting against uncredited or commercial exploitation.
+
+## About CloudPedagogy
+
+CloudPedagogy develops practical, ethical, and future-ready approaches to **AI capability** across education, research, and the public good.
+
+The AI Capability Framework and its associated tools — including this Programme Mapping application — are designed as **living resources**, intended to be adapted, extended, and reflected upon in real-world contexts.
+
+Learn more at: https://www.cloudpedagogy.com/
