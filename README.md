@@ -151,6 +151,5 @@ The tool is especially effective when used **collaboratively**, not individually
 From the project root:
 
 ```bash
-cd app
 npm install
 npm run dev
