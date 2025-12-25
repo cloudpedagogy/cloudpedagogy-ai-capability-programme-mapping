@@ -44,6 +44,21 @@ const PLURAL_LABELS: Record<MapItemType, string> = {
   Assessment: "Assessments",
 };
 
+/**
+ * Safe UUID generator for wider browser support.
+ * - Uses crypto.randomUUID() when available
+ * - Falls back to a reasonably unique string (sufficient for client-only IDs)
+ */
+function safeUUID(): string {
+  try {
+    const c: any = typeof crypto !== "undefined" ? crypto : undefined;
+    if (c && typeof c.randomUUID === "function") return c.randomUUID();
+  } catch {
+    // ignore
+  }
+  return `id-${Math.random().toString(36).slice(2)}-${Date.now().toString(36)}`;
+}
+
 function emptyDomains(): Record<DomainKey, boolean> {
   return {
     awareness: false,
@@ -56,7 +71,7 @@ function emptyDomains(): Record<DomainKey, boolean> {
 }
 
 function newItem(type: MapItemType): MapItem {
-  const id = crypto.randomUUID();
+  const id = safeUUID();
   return { id, type, name: "", notes: "", domains: emptyDomains() };
 }
 
@@ -89,7 +104,7 @@ function normalizeItems(itemsRaw: unknown): MapItem[] {
   if (arr.length === 0) return [newItem("Module")];
 
   return arr.map((it) => ({
-    id: typeof it?.id === "string" ? it.id : crypto.randomUUID(),
+    id: typeof it?.id === "string" ? it.id : safeUUID(),
     type: coerceMapItemType(it?.type),
     name: typeof it?.name === "string" ? it.name : "",
     notes: typeof it?.notes === "string" ? it.notes : "",
@@ -465,8 +480,6 @@ export default function App() {
       return;
     }
 
-    // Accept our export payload: { programme, items, ... }
-    // Or direct state: { programme, items }
     const nextProgramme = normalizeProgramme(parsed?.programme);
     const nextItems = normalizeItems(parsed?.items);
 
@@ -488,9 +501,7 @@ export default function App() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Reset input so importing the same file twice still triggers change event.
     e.target.value = "";
-
     void handleImportFile(file);
   }
 
@@ -514,10 +525,19 @@ export default function App() {
           </div>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
-            <button onClick={exportMarkdown} className="primary" disabled={!hasAnyTag} title={!hasAnyTag ? "Add at least one domain tag to enable export." : undefined}>
+            <button
+              onClick={exportMarkdown}
+              className="primary"
+              disabled={!hasAnyTag}
+              title={!hasAnyTag ? "Add at least one domain tag to enable export." : undefined}
+            >
               Export Markdown
             </button>
-            <button onClick={exportJSON} disabled={!hasAnyTag} title={!hasAnyTag ? "Add at least one domain tag to enable export." : undefined}>
+            <button
+              onClick={exportJSON}
+              disabled={!hasAnyTag}
+              title={!hasAnyTag ? "Add at least one domain tag to enable export." : undefined}
+            >
               Export JSON
             </button>
             <button onClick={triggerImport}>Import JSON</button>
@@ -539,7 +559,8 @@ export default function App() {
           />
 
           <p className="small muted" style={{ marginTop: 10 }}>
-            Exports download to your computer. Your in-progress work is saved in your browser automatically. Import a file previously exported from this tool.
+            Exports download to your computer. Your in-progress work is saved in your browser automatically. Import a
+            file previously exported from this tool.
           </p>
         </div>
 
@@ -559,7 +580,6 @@ export default function App() {
               </span>
             </summary>
 
-            {/* ✅ Step 5 guidance: programme context is optional, included in exports */}
             <p className="p muted" style={{ marginTop: 10 }}>
               Add minimal context so the mapping can be interpreted later (e.g. during review, QA, or team discussion).
               This information is included in exports.
