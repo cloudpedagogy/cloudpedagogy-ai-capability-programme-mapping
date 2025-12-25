@@ -17,6 +17,12 @@ The **AI Capability Programme Mapping Tool** helps educators, curriculum designe
 
 The tool is **framework-led**, **non-prescriptive**, and designed to support **professional judgement**, not replace it.
 
+## Example programme mapping
+
+The screenshot below shows the **AI Capability Programme Mapping Tool** in use, with modules and activities tagged against different AI capability domains. It illustrates how domain coverage, observations, and reflection prompts are generated dynamically as part of the mapping process.
+
+![Example of the AI Capability Programme Mapping Tool interface](docs/images/programme-mapping-example.png)
+
 ---
 
 ## What this application is not
