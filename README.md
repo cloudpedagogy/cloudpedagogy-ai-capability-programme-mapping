@@ -163,9 +163,24 @@ npm run dev
 
 ## Disclaimer
 
-CloudPedagogy tools are provided for reflective and developmental purposes only.
-They do not constitute professional, legal, academic, or organisational advice.
-Outputs should be interpreted in context and used as inputs to discussion, not as definitive judgements or decisions. 
+This repository contains **exploratory, framework-aligned tools** developed to support reflection and discussion around AI capability in education, research, and public-service contexts.
+
+The tools are provided **as-is** for learning and experimentation. They are **not production software**, **not decision or governance systems**, and **not compliance or benchmarking instruments**. Outputs are indicative only and should be interpreted in context, alongside professional judgement and local requirements.
+
+### What these tools are for
+- Exploring ideas related to the CloudPedagogy AI Capability Framework  
+- Supporting reflection, sense-making, and discussion  
+- Demonstrating concepts through lightweight, browser-based tools  
+- Encouraging critical and futures-oriented thinking  
+
+### What these tools are not
+- ❌ Not audits, evaluations, or quality judgements  
+- ❌ Not benchmarks against other individuals, programmes, or institutions  
+- ❌ Not maturity models, rankings, or scoring systems  
+- ❌ Not substitutes for professional expertise or organisational decision-making  
+
+All tools run entirely in the browser. **No user data is collected, stored, or transmitted**. Responsibility for interpretation and any subsequent use remains with the user or adopting institution.
+
 
 ## Licensing
 
