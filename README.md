@@ -161,6 +161,12 @@ npm install
 npm run dev
 ```
 
+## Disclaimer
+
+CloudPedagogy tools are provided for reflective and developmental purposes only.
+They do not constitute professional, legal, academic, or organisational advice.
+Outputs should be interpreted in context and used as inputs to discussion, not as definitive judgements or decisions. 
+
 ## Licensing
 
 This repository is licensed under the **Creative Commons Attribution–NonCommercial–ShareAlike 4.0 International (CC BY-NC-SA 4.0)** licence.
