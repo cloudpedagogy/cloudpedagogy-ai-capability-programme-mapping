@@ -196,10 +196,11 @@ Commercial use, resale, or incorporation into paid products or services is **not
 
 This licensing approach supports open educational reuse while protecting against uncredited or commercial exploitation.
 
+---
+
 ## About CloudPedagogy
 
-CloudPedagogy develops practical, ethical, and future-ready approaches to **AI capability** across education, research, and the public good.
+CloudPedagogy develops open, governance-credible resources for building confident, responsible AI capability across education, research, and public service.
 
-The AI Capability Framework and its associated tools — including this Programme Mapping application — are designed as **living resources**, intended to be adapted, extended, and reflected upon in real-world contexts.
-
-Learn more at: https://www.cloudpedagogy.com/
+- Website: https://www.cloudpedagogy.com/
+- Framework: https://github.com/cloudpedagogy/cloudpedagogy-ai-capability-framework
