@@ -5,6 +5,47 @@ A lightweight, browser-based tool for mapping **modules, learning activities, an
 This tool is part of the **CloudPedagogy AI Capability Tools** suite.
 
 ---
+## 🛠️ Getting Started
+
+### Clone the repository
+
+```bash
+git clone [repository-url]
+cd [repository-folder]
+```
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Run locally
+
+```bash
+npm run dev
+```
+
+Once running, your terminal will display a local URL (often http://localhost:5173). Open this in your browser to use the application.
+
+### Build for production
+
+```bash
+npm run build
+```
+
+The production build will be generated in the `dist/` directory and can be deployed to any static hosting service.
+
+---
+
+## 🔐 Privacy & Security
+
+- **Fully local**: All data remains in the user's browser  
+- **No backend**: No external API calls or database storage  
+- **Privacy-preserving**: No tracking or data exfiltration  
+- Suitable for use in sensitive organisational and governance contexts  
+
+---
 
 ## What this application is
 
@@ -145,22 +186,7 @@ The tool is especially effective when used **collaboratively**, not individually
 
 ---
 
-## How to run the application locally
 
-### Prerequisites
-
-- **Node.js** (v18+ recommended)
-- **npm**
-
-### Install and run
-
-From the project root:
-
-```bash
-npm install
-npm run dev
-```
----
 
 ## Disclaimer
 
