@@ -4,6 +4,11 @@ A lightweight, browser-based tool for mapping **modules, learning activities, an
 
 This tool is part of the **CloudPedagogy AI Capability Tools** suite.
 
+
+## 🌐 Live Application
+
+👉 http://cloudpedagogy-ai-capability-programme-mapping.s3-website.eu-west-2.amazonaws.com/
+
 ---
 ## 🛠️ Getting Started
 
