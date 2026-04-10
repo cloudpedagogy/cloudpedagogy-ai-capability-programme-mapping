@@ -1,0 +1,123 @@
+name: "New CloudPedagogy Tool"
+description: "Propose or implement a new AI Capability tool"
+title: "Tool: "
+labels: ["tool", "design-standard"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## CloudPedagogy Tool Proposal / Build
+
+        This issue tracks the design or implementation of a CloudPedagogy tool.
+        All tools must comply with the **Internal Design Standard** and complete
+        the **Pre-Flight Checklist** before release.
+
+        👉 Refer to:
+        - `/docs/DESIGN_STANDARD.md`
+        - `/docs/APP_PREFLIGHT_CHECKLIST.md`
+
+  - type: input
+    id: tool-name
+    attributes:
+      label: Tool name
+      description: Use the format “AI Capability + [Function]”
+      placeholder: "AI Capability Programme Mapping"
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose (one paragraph)
+      description: What reflective or judgement-support role does this tool play?
+      placeholder: |
+        This tool supports reflective thinking and discussion by…
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tool-status
+    attributes:
+      label: Tool status
+      options:
+        - Concept
+        - In design
+        - In build
+        - Ready for review
+        - Released
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## Pre-Flight Checklist
+
+        Complete **all** items before marking the tool as ready for release.
+
+  - type: checkboxes
+    id: structural-compliance
+    attributes:
+      label: A. Structural compliance
+      options:
+        - label: Uses the 5-part structure (Header, Purpose, Activity, Output, Framing)
+        - label: Tool name follows “AI Capability + [Function]”
+        - label: Purpose block included near the top
+        - label: Framing footer included at the end
+
+  - type: checkboxes
+    id: language-compliance
+    attributes:
+      label: B. Language compliance
+      options:
+        - label: No prescriptive language (“you should”, “the correct approach”)
+        - label: Outputs use conditional phrasing
+        - label: Tone is neutral and reflective
+        - label: No marketing or optimisation language
+
+  - type: checkboxes
+    id: framework-compliance
+    attributes:
+      label: C. Framework compliance
+      options:
+        - label: All six AI Capability domains are referenced or available as lenses
+        - label: Domain names match canonical wording exactly
+        - label: Domains are framed as considerations, not scores
+
+  - type: checkboxes
+    id: output-integrity
+    attributes:
+      label: D. Output integrity
+      options:
+        - label: Outputs follow the standard structure
+        - label: Outputs support discussion rather than enforcement
+        - label: No implied correctness, ranking, or compliance signals
+
+  - type: checkboxes
+    id: architecture
+    attributes:
+      label: E. Architectural compliance
+      options:
+        - label: Runs fully client-side
+        - label: No user accounts required
+        - label: No server-side persistence
+        - label: Local or session storage only (if used)
+
+  - type: checkboxes
+    id: final-check
+    attributes:
+      label: F. Final check
+      options:
+        - label: Tool supports judgement, not automation
+        - label: Tool would be appropriate in a professional / governance setting
+        - label: Tool reinforces (not replaces) the AI Capability Framework
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes / open questions
+      description: Any risks, uncertainties, or design questions to flag
+      placeholder: Optional

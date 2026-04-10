@@ -506,22 +506,28 @@ export default function App() {
   }
 
   return (
-    <div className="container">
-      <div className="stack">
+    <>
+      <header className="tool-header">
+        <div className="tool-header-content">
+          <a href="https://www.cloudpedagogy.com/" className="brand-link">
+            CloudPedagogy
+          </a>
+          <h1 className="h1">{TOOL_NAME}</h1>
+        </div>
+      </header>
+
+      <div className="container">
+        <div className="stack">
         {/* Header */}
         <div className="card stack">
+          <p className="p secondary">{SUBTITLE}</p>
+
           <div className="badge">
-            <span>CloudPedagogy</span>
+            <span>Saved locally</span>
             <span className="muted">•</span>
-            <span className="muted">AI Capability Tools</span>
-          </div>
-
-          <h1 className="h1">{TOOL_NAME}</h1>
-          <p className="p muted">{SUBTITLE}</p>
-
-          <div className="small muted" style={{ marginTop: 6 }}>
-            Saved locally • {totalItems} item{totalItems === 1 ? "" : "s"} •{" "}
-            {totalDomainTags} domain tag{totalDomainTags === 1 ? "" : "s"}
+            <span>{totalItems} item{totalItems === 1 ? "" : "s"}</span>
+            <span className="muted">•</span>
+            <span>{totalDomainTags} domain tag{totalDomainTags === 1 ? "" : "s"}</span>
           </div>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
@@ -535,13 +541,14 @@ export default function App() {
             </button>
             <button
               onClick={exportJSON}
+              className="secondary"
               disabled={!hasAnyTag}
               title={!hasAnyTag ? "Add at least one domain tag to enable export." : undefined}
             >
               Export JSON
             </button>
-            <button onClick={triggerImport}>Import JSON</button>
-            <button onClick={clearAll}>Clear</button>
+            <button onClick={triggerImport} className="secondary">Import JSON</button>
+            <button onClick={clearAll} className="secondary">Clear</button>
           </div>
 
           {!hasAnyTag && (
@@ -674,10 +681,10 @@ export default function App() {
                 <button className="primary" onClick={() => addItem("Module")}>
                   + Module
                 </button>
-                <button onClick={() => addItem("Activity")}>+ Activity</button>
-                <button onClick={() => addItem("Assessment")}>+ Assessment</button>
+                <button className="secondary" onClick={() => addItem("Activity")}>+ Activity</button>
+                <button className="secondary" onClick={() => addItem("Assessment")}>+ Assessment</button>
               </div>
-              <p className="small">
+              <p className="small muted">
                 Tip: keep items granular enough to discuss (e.g. “Research Methods Seminar 2”, “Portfolio”, “Lab practical
                 1”).
               </p>
@@ -699,7 +706,7 @@ export default function App() {
 
           <div className="stack">
             {items.map((item, idx) => (
-              <div key={item.id} className="card stack" style={{ background: "#fcfcfc" }}>
+              <div key={item.id} className="card nested stack">
                 <div
                   style={{
                     display: "flex",
@@ -711,7 +718,7 @@ export default function App() {
                   <div className="badge">
                     <strong>{idx + 1}.</strong> <span>{item.type}</span>
                   </div>
-                  <button onClick={() => removeItem(item.id)} disabled={items.length === 1}>
+                  <button className="secondary" onClick={() => removeItem(item.id)} disabled={items.length === 1}>
                     Remove
                   </button>
                 </div>
@@ -742,29 +749,28 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="stack">
-                  <label>Tag domains</label>
-                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                    {DOMAINS.map((d) => {
-                      const active = item.domains[d.key];
-                      return (
-                        <button
-                          key={d.key}
-                          onClick={() => toggleDomain(item.id, d.key)}
-                          className={active ? "primary" : undefined}
-                          aria-pressed={active}
-                          title={d.name}
-                        >
-                          {active ? "✓ " : ""}
-                          {d.short}
-                        </button>
-                      );
-                    })}
+                  <div className="stack-tight">
+                    <label>Tag domains</label>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {DOMAINS.map((d) => {
+                        const active = item.domains[d.key];
+                        return (
+                          <button
+                            key={d.key}
+                            onClick={() => toggleDomain(item.id, d.key)}
+                            className={`tag ${active ? "active" : ""}`}
+                            aria-pressed={active}
+                            title={d.name}
+                          >
+                            {d.short}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="small muted">
+                      Tags represent <em>meaningful</em> engagement with a domain, not mere mention. Use judgement.
+                    </p>
                   </div>
-                  <p className="small">
-                    Tags represent <em>meaningful</em> engagement with a domain, not mere mention. Use judgement.
-                  </p>
-                </div>
               </div>
             ))}
           </div>
@@ -829,10 +835,14 @@ export default function App() {
           </p>
         </div>
 
-        <div className="small muted" style={{ textAlign: "center", paddingBottom: 10 }}>
-          CloudPedagogy • Static tool scaffold • Client-side only
         </div>
       </div>
-    </div>
+
+      <footer className="tool-footer">
+        <div className="tool-footer-content">
+          CloudPedagogy · Governance-ready AI and curriculum systems
+        </div>
+      </footer>
+    </>
   );
 }
