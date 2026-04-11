@@ -11,11 +11,20 @@ import {
 
 type MapItemType = "Module" | "Activity" | "Assessment";
 
+type ItemWeight = "Low" | "Medium" | "High";
+
+const WEIGHT_MAP: Record<ItemWeight, number> = {
+  Low: 1,
+  Medium: 2,
+  High: 3,
+};
+
 type MapItem = {
   id: string;
   type: MapItemType;
   name: string;
   notes: string;
+  weight: ItemWeight;
   domains: Record<DomainKey, boolean>;
 };
 
@@ -33,6 +42,10 @@ type ExportPayload = {
   exportedAt: string; // ISO datetime
   programme: ProgrammeDetails;
   items: MapItem[];
+  analytics?: {
+    totalItems: number;
+    weightedCoverage: Record<DomainKey, number>;
+  };
 };
 
 const STORAGE_KEY = "cloudpedagogy_programme_mapping_v1";
@@ -46,8 +59,6 @@ const PLURAL_LABELS: Record<MapItemType, string> = {
 
 /**
  * Safe UUID generator for wider browser support.
- * - Uses crypto.randomUUID() when available
- * - Falls back to a reasonably unique string (sufficient for client-only IDs)
  */
 function safeUUID(): string {
   try {
@@ -72,7 +83,7 @@ function emptyDomains(): Record<DomainKey, boolean> {
 
 function newItem(type: MapItemType): MapItem {
   const id = safeUUID();
-  return { id, type, name: "", notes: "", domains: emptyDomains() };
+  return { id, type, name: "", notes: "", weight: "Medium", domains: emptyDomains() };
 }
 
 function todayISODate(): string {
@@ -99,6 +110,11 @@ function coerceMapItemType(v: unknown): MapItemType {
   return "Module";
 }
 
+function coerceWeight(v: unknown): ItemWeight {
+  if (v === "Low" || v === "Medium" || v === "High") return v;
+  return "Medium";
+}
+
 function normalizeItems(itemsRaw: unknown): MapItem[] {
   const arr = Array.isArray(itemsRaw) ? (itemsRaw as any[]) : [];
   if (arr.length === 0) return [newItem("Module")];
@@ -108,6 +124,7 @@ function normalizeItems(itemsRaw: unknown): MapItem[] {
     type: coerceMapItemType(it?.type),
     name: typeof it?.name === "string" ? it.name : "",
     notes: typeof it?.notes === "string" ? it.notes : "",
+    weight: coerceWeight(it?.weight),
     domains: {
       ...emptyDomains(),
       ...(typeof it?.domains === "object" && it?.domains ? it.domains : {}),
@@ -143,6 +160,7 @@ function loadState(): { programme: ProgrammeDetails; items: MapItem[] } {
     return { programme: defaultProgrammeDetails(), items: [newItem("Module")] };
   }
 }
+
 
 function downloadBlob(filename: string, blob: Blob) {
   const url = URL.createObjectURL(blob);
@@ -183,9 +201,10 @@ function buildMarkdown(args: {
   programme: ProgrammeDetails;
   items: MapItem[];
   coverage: Record<DomainKey, number>;
+  weightedCoverage: Record<DomainKey, number>;
   observations: string[];
 }) {
-  const { toolName, exportedAtISO, programme, items, coverage, observations } = args;
+  const { toolName, exportedAtISO, programme, items, coverage, weightedCoverage, observations } = args;
 
   const programmeTitle = (programme.programmeTitle || "Programme mapping").trim();
   const mappingDate = (programme.mappingDate || todayISODate()).trim();
@@ -219,12 +238,12 @@ function buildMarkdown(args: {
   md.push(PRIVACY_TEXT);
   md.push("");
 
-  md.push("## Coverage snapshot");
+  md.push("## Coverage intensity snapshot");
   md.push("");
-  md.push("| Domain | Tagged items |");
-  md.push("|---|---:|");
+  md.push("| Domain | Tagged items | Intensity score |");
+  md.push("|---|---:|---:|");
   for (const d of DOMAINS) {
-    md.push(`| ${escapePipes(d.name)} | ${coverage[d.key]} |`);
+    md.push(`| ${escapePipes(d.name)} | ${coverage[d.key]} | ${weightedCoverage[d.key]} |`);
   }
   md.push("");
 
@@ -256,8 +275,8 @@ function buildMarkdown(args: {
       return;
     }
 
-    md.push("| # | Item | Domain tags | Notes |");
-    md.push("|---:|---|---|---|");
+    md.push("| # | Item | Intensity | Domain tags | Notes |");
+    md.push("|---:|---|---|---|---|");
 
     list.forEach((it, idx) => {
       const name = (it.name || "").trim() || "Untitled";
@@ -265,7 +284,7 @@ function buildMarkdown(args: {
       const notes = (it.notes || "").trim();
 
       md.push(
-        `| ${idx + 1} | ${escapePipes(name)} | ${
+        `| ${idx + 1} | ${escapePipes(name)} | ${it.weight} | ${
           tags.length ? escapePipes(tags.join(", ")) : "_None_"
         } | ${notes ? escapePipes(notes) : "_—_"} |`
       );
@@ -322,29 +341,72 @@ export default function App() {
 
   const coverage = useMemo(() => {
     const counts: Record<DomainKey, number> = {
-      awareness: 0,
-      coagency: 0,
-      practice: 0,
-      ethics: 0,
-      governance: 0,
-      reflection: 0,
+      awareness: 0, coagency: 0, practice: 0, ethics: 0, governance: 0, reflection: 0,
     };
-
     for (const item of items) {
       (Object.keys(item.domains) as DomainKey[]).forEach((k) => {
         if (item.domains[k]) counts[k] += 1;
       });
     }
-
     return counts;
   }, [items]);
 
-  const totalItems = items.length;
+  const weightedCoverage = useMemo(() => {
+    const density: Record<DomainKey, number> = {
+      awareness: 0, coagency: 0, practice: 0, ethics: 0, governance: 0, reflection: 0,
+    };
+    for (const item of items) {
+      const w = WEIGHT_MAP[item.weight] || 2;
+      (Object.keys(item.domains) as DomainKey[]).forEach((k) => {
+        if (item.domains[k]) density[k] += w;
+      });
+    }
+    return density;
+  }, [items]);
 
+  const observations = useMemo(() => {
+    const lines: string[] = [];
+    const totalItems = items.length;
+
+    lines.push(
+      `The programme includes ${totalItems} mapped item${totalItems === 1 ? "" : "s"}. ` +
+      "Embedding intensity varies across domains based on activity weighting (Low/Medium/High)."
+    );
+
+    const totalWeighted = Object.values(weightedCoverage).reduce((a, b) => a + b, 0);
+    const avgWeighted = totalWeighted / DOMAINS.length;
+
+    const primaryGaps = DOMAINS.filter(d => weightedCoverage[d.key] === 0);
+    const secondaryGaps = DOMAINS.filter(d => {
+      const val = weightedCoverage[d.key];
+      return val > 0 && val < (avgWeighted * 0.5);
+    });
+
+    if (primaryGaps.length > 0) {
+      lines.push(
+        `**Primary Gap Detected:** No explicit coverage found for ${primaryGaps.map(d => d.name).join(", ")}. ` +
+        "This indicates these domains are currently unowned or implicit in the curriculum design."
+      );
+    }
+
+    if (secondaryGaps.length > 0) {
+      lines.push(
+        `**Secondary Gap Detected:** Relatively low embedding intensity for ${secondaryGaps.map(d => d.name).join(", ")} ` +
+        "(below 50% of the programme average). These domains may benefit from more explicit focus in future review cycles."
+      );
+    }
+
+    if (totalWeighted > 0 && primaryGaps.length === 0 && secondaryGaps.length === 0) {
+      lines.push("Domain coverage appears relatively balanced across the programme, with no stand-out gaps detected based on current weighting.");
+    }
+
+    return lines;
+  }, [weightedCoverage, items.length]);
+
+  const totalItems = items.length;
   const totalDomainTags = useMemo(() => {
     return DOMAINS.reduce((sum, d) => sum + coverage[d.key], 0);
   }, [coverage]);
-
   const hasAnyTag = totalDomainTags > 0;
 
   function updateProgramme(patch: Partial<ProgrammeDetails>) {
@@ -376,62 +438,9 @@ export default function App() {
       "Clear this mapping?\n\nThis will remove programme details and all items from this browser. You can export first if you want a backup."
     );
     if (!ok) return;
-
     setProgramme(defaultProgrammeDetails());
     setItems([newItem("Module")]);
   }
-
-  const observations = useMemo(() => {
-    const lines: string[] = [];
-
-    lines.push(
-      `You mapped ${totalItems} item${
-        totalItems === 1 ? "" : "s"
-      }. Domain tagging indicates where attention is currently concentrated.`
-    );
-
-    const totalTagged = DOMAINS.reduce((sum, d) => sum + coverage[d.key], 0);
-
-    if (totalTagged > 0) {
-      const sorted = [...DOMAINS].sort((a, b) => coverage[b.key] - coverage[a.key]);
-      const most = sorted[0];
-      const least = sorted[sorted.length - 1];
-
-      if (most) {
-        lines.push(
-          `The most represented domain is **${most.name}** (${coverage[most.key]} item${
-            coverage[most.key] === 1 ? "" : "s"
-          }).`
-        );
-      }
-      if (least) {
-        lines.push(
-          `The least represented domain is **${least.name}** (${coverage[least.key]} item${
-            coverage[least.key] === 1 ? "" : "s"
-          }).`
-        );
-      }
-
-      const zeroDomains = DOMAINS.filter((d) => coverage[d.key] === 0);
-      if (zeroDomains.length) {
-        lines.push(
-          `No items were tagged for: ${zeroDomains
-            .map((d) => d.name)
-            .join(
-              ", "
-            )}. This may indicate a gap, or that the domain is addressed implicitly rather than explicitly.`
-        );
-      }
-    } else {
-      lines.push(
-        "No domain tags yet. Add a few items and tag at least one domain to generate coverage insights."
-      );
-    }
-
-    lines.push("Treat these signals as prompts for discussion, not as performance scores.");
-
-    return lines;
-  }, [coverage, totalItems]);
 
   function exportJSON() {
     const payload: ExportPayload = {
@@ -439,6 +448,10 @@ export default function App() {
       exportedAt: new Date().toISOString(),
       programme,
       items,
+      analytics: {
+        totalItems: items.length,
+        weightedCoverage,
+      },
     };
 
     const safeTitle =
@@ -459,6 +472,7 @@ export default function App() {
       programme,
       items,
       coverage,
+      weightedCoverage,
       observations,
     });
 
@@ -741,17 +755,36 @@ export default function App() {
                   </div>
                   <div className="stack">
                     <label>Notes (optional)</label>
-                    <textarea
-                      value={item.notes}
-                      placeholder="e.g. what AI use is expected, what judgement is required, what risks or governance concerns exist…"
-                      onChange={(e) => updateItem(item.id, { notes: e.target.value })}
-                    />
+                      <textarea
+                        value={item.notes}
+                        placeholder="e.g. what AI use is expected, what judgement is required, what risks or governance concerns exist…"
+                        onChange={(e) => updateItem(item.id, { notes: e.target.value })}
+                      />
+                    </div>
                   </div>
-                </div>
 
-                  <div className="stack-tight">
-                    <label>Tag domains</label>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <div className="row">
+                    <div className="stack-tight">
+                      <label>Embedding Intensity</label>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        {(["Low", "Medium", "High"] as ItemWeight[]).map((w) => (
+                          <button
+                            key={w}
+                            className={`tag ${item.weight === w ? "active" : ""}`}
+                            onClick={() => updateItem(item.id, { weight: w })}
+                          >
+                            {w}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="small muted">
+                        Intensity reflects how deeply the capability is embedded (e.g. mention vs evaluation).
+                      </p>
+                    </div>
+
+                    <div className="stack-tight">
+                      <label>Tag domains</label>
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       {DOMAINS.map((d) => {
                         const active = item.domains[d.key];
                         return (
@@ -771,6 +804,7 @@ export default function App() {
                       Tags represent <em>meaningful</em> engagement with a domain, not mere mention. Use judgement.
                     </p>
                   </div>
+                </div>
               </div>
             ))}
           </div>
@@ -778,22 +812,89 @@ export default function App() {
 
         {/* Output */}
         <div className="card stack">
-          <h2 className="h2">Output</h2>
+          <h2 className="h2">Output & Coverage Analysis</h2>
+          
+          <div className="stack">
+            <h3 className="h2" style={{ fontSize: 15 }}>Domain Coverage Heatmap</h3>
+            <p className="small muted">Visual matrix of items vs capability domains. Cell intensity reflects embedding weight (Low to High).</p>
+            <div style={{ 
+              overflowX: "auto", 
+              border: "1px solid #E5E7EB", 
+              borderRadius: 6,
+              background: "#F9FAFB",
+              padding: 12
+            }}>
+              <table style={{ borderCollapse: "collapse", minWidth: 600, width: "100%" }}>
+                <thead>
+                  <tr>
+                    <th style={{ width: 180, textAlign: "left", fontSize: 11, padding: 8, color: "#777" }}>Item</th>
+                    {DOMAINS.map(d => (
+                      <th key={d.key} title={d.name} style={{ textAlign: "center", fontSize: 11, padding: 8, color: "#777", width: 60 }}>
+                        {d.short}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item, idx) => (
+                    <tr key={item.id} style={{ borderTop: "1px solid #E5E7EB" }}>
+                      <td style={{ fontSize: 12, padding: 8, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 180 }}>
+                        {idx + 1}. {item.name || "Untitled"}
+                      </td>
+                      {DOMAINS.map(d => {
+                        const active = item.domains[d.key];
+                        const w = WEIGHT_MAP[item.weight];
+                        const opacity = active ? (w === 3 ? 1 : w === 2 ? 0.6 : 0.3) : 0;
+                        return (
+                          <td key={d.key} style={{ padding: 4 }}>
+                            <div style={{ 
+                              height: 20, 
+                              background: active ? "#111111" : "transparent", 
+                              opacity, 
+                              borderRadius: 3,
+                              border: active ? "1px solid #111111" : "1px dashed #E5E7EB"
+                            }} />
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-          <div className="row">
+          <div className="row" style={{ marginTop: 24 }}>
             <div className="stack">
-              <div className="badge">Coverage snapshot</div>
+              <div className="badge">Coverage intensity</div>
               <div className="stack">
-                {DOMAINS.map((d) => (
-                  <div key={d.key} style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                    <span className="small">
-                      <strong>{d.name}</strong>
-                    </span>
-                    <span className="small">
-                      {coverage[d.key]} item{coverage[d.key] === 1 ? "" : "s"}
-                    </span>
-                  </div>
-                ))}
+                {DOMAINS.map((d) => {
+                  const val = weightedCoverage[d.key];
+                  const totalWeighted = Object.values(weightedCoverage).reduce((a, b) => a + b, 0) || 1;
+                  const avgWeighted = totalWeighted / DOMAINS.length;
+                  const isPrimaryGap = val === 0;
+                  const isSecondaryGap = val > 0 && val < (avgWeighted * 0.5);
+                  
+                  return (
+                    <div key={d.key} className="stack-tight">
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+                        <span className="small" style={{ fontWeight: 600 }}>{d.name}</span>
+                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                          {isPrimaryGap && <span className="tag" style={{ background: "#FEE2E2", color: "#B91C1C", borderColor: "#FEE2E2", fontSize: 10 }}>Primary Gap</span>}
+                          {isSecondaryGap && <span className="tag" style={{ background: "#FEF3C7", color: "#92400E", borderColor: "#FEF3C7", fontSize: 10 }}>Secondary Gap</span>}
+                          <span className="small muted">{val} intensity</span>
+                        </div>
+                      </div>
+                      <div style={{ height: 4, background: "#F3F4F6", borderRadius: 2, overflow: "hidden" }}>
+                        <div style={{ 
+                          height: "100%", 
+                          width: `${Math.min(100, (val / (Math.max(...Object.values(weightedCoverage)) || 1)) * 100)}%`, 
+                          background: isPrimaryGap ? "#E5E7EB" : isSecondaryGap ? "#F59E0B" : "#111111" 
+                        }} />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -824,6 +925,7 @@ export default function App() {
             </ul>
           </div>
         </div>
+
 
         {/* Framing & next steps */}
         <div className="card stack">
