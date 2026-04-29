@@ -35,6 +35,11 @@ type ProgrammeDetails = {
   institution: string;
   mappingDate: string; // YYYY-MM-DD
   version: string;
+  aiInvolvement?: string;
+  assumptions?: string;
+  risks?: string;
+  rationale?: string;
+  reviewNotes?: string;
 };
 
 type ExportPayload = {
@@ -143,6 +148,11 @@ function normalizeProgramme(p: unknown): ProgrammeDetails {
     institution: typeof obj.institution === "string" ? obj.institution : base.institution,
     mappingDate: typeof obj.mappingDate === "string" ? obj.mappingDate : base.mappingDate,
     version: typeof obj.version === "string" ? obj.version : base.version,
+    aiInvolvement: typeof obj.aiInvolvement === "string" ? obj.aiInvolvement : undefined,
+    assumptions: typeof obj.assumptions === "string" ? obj.assumptions : undefined,
+    risks: typeof obj.risks === "string" ? obj.risks : undefined,
+    rationale: typeof obj.rationale === "string" ? obj.rationale : undefined,
+    reviewNotes: typeof obj.reviewNotes === "string" ? obj.reviewNotes : undefined,
   };
 }
 
@@ -935,6 +945,65 @@ export default function App() {
             Next step (optional): export your mapping notes into your programme documentation, then revisit during review
             or QA cycles.
           </p>
+        </div>
+
+        {/* Lightweight capability and governance layer */}
+        {/* Optional, non-blocking, and does not alter core workflow */}
+        <div className="card stack">
+          <details>
+            <summary className="h2" style={{ cursor: "pointer", listStyle: "none" }}>
+              Capability & Governance Notes (Optional) <span className="muted" style={{ fontSize: 14 }}>— click to expand</span>
+            </summary>
+            
+            <p className="p muted" style={{ marginTop: 10 }}>
+              Use these optional fields to make AI assumptions, risks, and rationales visible.
+            </p>
+
+            <div className="stack" style={{ marginTop: 16 }}>
+              <label>AI Involvement</label>
+              <textarea
+                value={programme.aiInvolvement || ""}
+                placeholder="How is AI involved in this process?"
+                onChange={(e) => updateProgramme({ aiInvolvement: e.target.value })}
+              />
+            </div>
+            
+            <div className="stack">
+              <label>Assumptions</label>
+              <textarea
+                value={programme.assumptions || ""}
+                placeholder="What assumptions are being made?"
+                onChange={(e) => updateProgramme({ assumptions: e.target.value })}
+              />
+            </div>
+
+            <div className="stack">
+              <label>Risks or Concerns</label>
+              <textarea
+                value={programme.risks || ""}
+                placeholder="What are the potential risks?"
+                onChange={(e) => updateProgramme({ risks: e.target.value })}
+              />
+            </div>
+
+            <div className="stack">
+              <label>Rationale</label>
+              <textarea
+                value={programme.rationale || ""}
+                placeholder="Why was this approach chosen?"
+                onChange={(e) => updateProgramme({ rationale: e.target.value })}
+              />
+            </div>
+
+            <div className="stack">
+              <label>Human Review Notes</label>
+              <textarea
+                value={programme.reviewNotes || ""}
+                placeholder="Notes from human review and oversight"
+                onChange={(e) => updateProgramme({ reviewNotes: e.target.value })}
+              />
+            </div>
+          </details>
         </div>
 
         </div>

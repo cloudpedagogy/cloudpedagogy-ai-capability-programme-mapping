@@ -55,3 +55,12 @@ High overlap with `programme-governance-dashboard`; distinguished by its "Activi
 
 ## 15. Anything Unclear or Inferred from Repo Contents
 Individual item weights (e.g., credit value impact) are inferred to be handled qualitatively in "Notes" rather than via numeric weighting in this prototype.
+
+## Capability and Governance Alignment
+
+This tool is aligned with the CloudPedagogy Capability and Governance standard.
+
+- Capability: The tool supports development of practical AI capability through structured interaction and workflow use.
+- Governance: The tool includes lightweight, optional fields that make assumptions, risks, and decisions visible and reviewable.
+
+This alignment ensures the tool supports both effective use of AI and responsible, accountable practice.

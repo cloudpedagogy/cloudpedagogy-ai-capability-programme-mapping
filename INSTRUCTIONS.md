@@ -46,3 +46,10 @@ This application maps the density and distribution of AI capabilities across an 
 ---
 ### 10. Tips
 - Look out for "ghost modules" where AI is tagged as a capability but carries 0% assessment weight — students will likely ignore this capability.
+
+---
+### 11. Capability and Governance
+- **What the tool does:** This tool maps the density and distribution of AI capabilities across an academic programme.
+- **How capability is developed:** Capability is developed through structured interaction with real workflows, helping users systematically review curriculum alignment.
+- **How governance is supported:** Governance is supported through lightweight, optional fields that make assumptions, risks, and rationales visible and reviewable.
+- **Explanation of optional fields:** The "Capability & Governance Notes (Optional)" section allows users to document AI involvement, assumptions, risks, rationale, and review notes to support professional judgement and accountability.

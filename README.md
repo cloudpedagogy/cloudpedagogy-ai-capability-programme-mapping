@@ -29,7 +29,6 @@ Estimates and maps AI capability coverage across curriculum structures (programm
 - Perform detailed workload or assessment simulation  
 - Record or audit individual human–AI decision activity  
 
-For a full system overview, see: [SYSTEM_OVERVIEW.md](../SYSTEM_OVERVIEW.md)
 
 ---
 
@@ -77,3 +76,12 @@ CloudPedagogy develops open, governance-credible tools for building confident, r
 
 - Website: https://www.cloudpedagogy.com/  
 - Framework: https://github.com/cloudpedagogy/cloudpedagogy-ai-capability-framework  
+
+## Capability and Governance
+
+This tool supports both AI capability development and lightweight governance.
+
+- Capability is developed through structured interaction with real workflows
+- Governance is supported through optional fields that make assumptions, risks, and decisions visible
+
+All governance inputs are optional and designed to support — not constrain — professional judgement.
